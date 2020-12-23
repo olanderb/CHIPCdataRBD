@@ -117,6 +117,7 @@ Row
 -------------------------------------
 
 ### Phasing of Areas: Current (September - December 2020)  
+
 ```{r, fig.height= 10, fig.width= 5}
 CHmapleaflet_current
 ```  
@@ -141,7 +142,7 @@ Population Estimates (table & graph) {data-navmenu="Figures"}
 Row 
 -------------------------------------
 
-### Population Estimates (in millions) by Phase: November 2020 Exercise Current (September - December 2020)  
+### Population Estimates (in millions) by Phase: November 2020 Exercise (Current: Sep.-Dec. 2020)  
 
 ```{r}
 ggplotly(cadre_harmonise_caf_ipcnov2020currentgraph)
@@ -149,7 +150,7 @@ ggplotly(cadre_harmonise_caf_ipcnov2020currentgraph)
   
 > Hover cursor over graph for more information; select phases in legend to filter
 
-### Population Estimates (in millions) by Phase: November 2020 Exercise Current (September - December 2020)  
+### Population Estimates (in millions) by Phase: November 2020 Exercise (Current: Sep.- Dec. 2020)  
 
 ```{r}
 datatable(cadre_harmonise_caf_ipcnov2020current,  extensions = 'Buttons', options = list(pageLength = 18, dom = "Bft",
@@ -166,7 +167,7 @@ Row
 -------------------------------------
 
 
-### Population Estimates (in millions) by Phase: November 2020 Exercise Projected (June - August 2021) 
+### Population Estimates (in millions) by Phase: November 2020 Exercise (Projected: Jun. - Aug. 2021) 
 
 ```{r}
 ggplotly(cadre_harmonise_caf_ipcnov2020projectedgraph)
@@ -174,7 +175,7 @@ ggplotly(cadre_harmonise_caf_ipcnov2020projectedgraph)
 
 > Hover cursor over graph for more information; select phases in legend to filter
 
-### Population Estimates (in millions) by Phase: November 2020 Exercise Projected (June - August 2021)
+### Population Estimates (in millions) by Phase: November 2020 Exercise (Projected: Jun. - Aug. 2021)
     
 ```{r}
 datatable(cadre_harmonise_caf_ipcnov2020projected,  extensions = 'Buttons', options = list(pageLength = 18, dom = "Bft",
