@@ -2,7 +2,7 @@
 title: "**Cadre Harmonisé (CH) & Integrated Phase Classification (IPC) Estimations <br> for West & Central Africa November 2020 Exercise Results**"
 output: 
   flexdashboard::flex_dashboard:
-  vertical_layout: scroll
+  vertical_layout: fill
 ---
 
 ```{r setup, include=FALSE, fig.height=15, fig.width=5}
