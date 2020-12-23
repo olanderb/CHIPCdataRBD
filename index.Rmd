@@ -1,0 +1,189 @@
+---
+title: "**Cadre Harmonisé (CH) & Integrated Phase Classification (IPC) Estimations <br> for West & Central Africa November 2020 Exercise Results**"
+output: 
+  flexdashboard::flex_dashboard:
+  vertical_layout: scroll
+---
+
+```{r setup, include=FALSE, fig.height=15, fig.width=5}
+library(flexdashboard)
+library(tidyverse)
+library(DT)
+library(plotly)
+library(readxl)
+library(leaflet)
+library(sf)
+library(leaflet.extras2)
+
+cadre_harmonise_caf_ipc <- read_excel("cadre_harmonise_caf_ipc.xlsx")
+cadre_harmonise_caf_ipcnov2020 <- cadre_harmonise_caf_ipc %>% filter(exercise_year == 2020 & exercise_label == "Sep-Dec") %>% mutate_at(vars(population:phase35), replace_na, 0) 
+
+#make tables
+#by country
+cadre_harmonise_caf_ipcnov2020country <- cadre_harmonise_caf_ipcnov2020 %>% group_by(Country = adm0_name, chtype) %>% summarise(population = sum(population), phase1 = sum(phase1), phase2 = sum(phase2), phase3 =sum(phase3), phase4 = sum(phase4), phase5 = sum(phase5), phase35 = sum(phase35)) %>% mutate_if(is.numeric, funs(. / 1000000)) %>% mutate_if(is.numeric, round, 2)
+#total
+cadre_harmonise_caf_ipcnov2020total <- cadre_harmonise_caf_ipcnov2020 %>% group_by(chtype) %>% 
+  summarise(population = sum(population), phase1 = sum(phase1), phase2 = sum(phase2), phase3 = sum(phase3), phase4 = sum(phase4), phase5 = sum(phase5), phase35 = sum(phase35)) %>% mutate(Country = "Total") %>% mutate_if(is.numeric, funs(. / 1000000)) %>% mutate_if(is.numeric, round, 1)
+#put country and total together
+cadre_harmonise_caf_ipcnov2020all <- bind_rows(cadre_harmonise_caf_ipcnov2020country, cadre_harmonise_caf_ipcnov2020total)
+#seperate current from projected
+cadre_harmonise_caf_ipcnov2020current <- cadre_harmonise_caf_ipcnov2020all %>% filter(chtype == "current") %>% select(-chtype)
+cadre_harmonise_caf_ipcnov2020projected <- cadre_harmonise_caf_ipcnov2020all %>% filter(chtype == "projected") %>% select(-chtype)
+
+#make graphs 
+CH_colors = c("phase1" = "#c6ffc7", "phase2" = "#ffe718", "phase3" = "#e88400", "phase4" = "#e02d00", "phase5" = "#5e0803") 
+#long
+cadre_harmonise_caf_ipcnov2020countrylong <- cadre_harmonise_caf_ipcnov2020country %>% select(-population, -phase35) %>% pivot_longer(cols = phase1:phase5, names_to = "phase", "value")
+cadre_harmonise_caf_ipcnov2020currentgraph <- cadre_harmonise_caf_ipcnov2020countrylong %>% filter(chtype == "current") %>% ggplot(aes(x = Country, y = value, fill = phase)) +geom_bar(stat = "identity") +theme_minimal() +theme(axis.text.x = element_text(angle = 90)) +scale_fill_manual(values=CH_colors) +xlab("") +ylab("") +
+      theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()
+      ) 
+cadre_harmonise_caf_ipcnov2020projectedgraph <- cadre_harmonise_caf_ipcnov2020countrylong %>% filter(chtype == "projected") %>% ggplot(aes(x = Country, y = value, fill = phase)) +geom_bar(stat = "identity") +theme_minimal() +theme(axis.text.x = element_text(angle = 90)) +scale_fill_manual(values=CH_colors) +xlab("") +ylab("")+
+      theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()
+      ) 
+
+#add CH shapefile
+CH <- read_sf("wca_CHIPC_clean_nov2020.gpkg")
+#add boundarry of countries
+wca_shp0 <- read_sf("wca_shp0.gpkg")
+
+#reassign
+pal <-  colorFactor(palette = c("#c6ffc7", "#ffe718", "#e88400","#e02d00","#E1E1E1"), 
+              levels = c("1", "2", "3", "4","Not Analyzed"))
+
+CHmapleaflet_current <- CH %>% leaflet() %>% addPolygons(weight = 0.25, fillOpacity = 0.75,
+                                                       color = ~pal(currentnov2020_phase_class),
+                                                       popup = paste("Country:", CH$adm0_name, "<br>",
+                                                                    "Admin1:", CH$adm1_name, "<br>",
+                                                                    "Admin2:", CH$adm2_name, "<br>",
+                                                                    "Phase:", CH$currentnov2020_phase_class, "<br>",
+                                                                    "Total Population:", CH$currentnov2020_population, "<br>",
+                                                                    "Phase 1 Population:", CH$currentnov2020_phase1, "<br>",
+                                                                    "Phase 2 Population:", CH$currentnov2020_phase2, "<br>",
+                                                                    "Phase 3 Population:", CH$currentnov2020_phase3, "<br>",
+                                                                    "Phase 4 Population:", CH$currentnov2020_phase4, "<br>",
+                                                                    "Phase 5 Population:", CH$currentnov2020_phase5, "<br>",
+                                                                    "Phase 3-5 Population:", CH$currentnov2020_phase35, "<br>"),
+                                                       highlight = highlightOptions(weight = 3, color = "black", bringToFront = FALSE)) %>% 
+                                                       addLegend("bottomleft", pal = pal, values = ~currentnov2020_phase_class,
+            title = "Phase",
+            opacity = 4) %>% addPolylines(data=wca_shp0, color="#000000", weight=2.5) %>%
+  addEasyprint() %>% setView(lat= 13, lng=3, zoom=4)  %>%
+  addEasyButton(easyButton(
+    icon="fa-globe", title="reset to original view",
+    onClick=JS("function(btn, map){ map.setView([13, 3], 4);}")))
+
+
+
+
+CHmapleaflet_projected <- CH %>% leaflet() %>% addPolygons(weight = 0.25, fillOpacity = 0.75,
+                                                       color = ~pal(projectednov2020_phase_class),
+                                                       popup = paste("Country:", CH$adm0_name, "<br>",
+                                                                    "Admin1:", CH$adm1_name, "<br>",
+                                                                    "Admin2:", CH$adm2_name, "<br>",
+                                                                    "Phase:", CH$projectednov2020_phase_class, "<br>",
+                                                                    "Total Population:", CH$projectednov2020_population, "<br>",
+                                                                    "Phase 1 Population:", CH$projectednov2020_phase1, "<br>",
+                                                                    "Phase 2 Population:", CH$projectednov2020_phase2, "<br>",
+                                                                    "Phase 3 Population:", CH$projectednov2020_phase3, "<br>",
+                                                                    "Phase 4 Population:", CH$projectednov2020_phase4, "<br>",
+                                                                    "Phase 5 Population:", CH$projectednov2020_phase5, "<br>",
+                                                                    "Phase 3-5 Population:", CH$currentnov2020_phase35, "<br>"),
+                                                       highlight = highlightOptions(weight = 3, color = "black", bringToFront = F)) %>% 
+                                                       addLegend("bottomleft", pal = pal, values = ~projectednov2020_phase_class,
+            title = "Phase",
+            opacity = 4) %>% addPolylines(data=wca_shp0, color="#000000", weight=2.5) %>%
+  addEasyprint() %>% setView(lat= 13, lng=3, zoom=4)  %>%
+  addEasyButton(easyButton(
+    icon="fa-globe", title="reset to original view",
+    onClick=JS("function(btn, map){ map.setView([13, 3], 4);}")))
+
+
+
+
+
+
+
+```
+
+Map of Current & Projected Phases
+=====================================
+
+Row {data-height = 300}
+-------------------------------------
+
+
+### Population Estimates (in millions) by Phase: November 2020 Exercise Current (September - December 2020)  
+
+```{r}
+CHmapleaflet_current
+```  
+
+> Click on polygon area for more information
+
+Row
+-------------------------------------
+
+
+### Population Estimates (in millions) by Phase: November 2020 Exercise Projected (June - August 2021) 
+
+```{r}
+CHmapleaflet_projected
+```  
+
+> Click on polygon area for more information
+
+
+Population Estimates (table & graph)
+=====================================
+
+Row 
+-------------------------------------
+
+### Population Estimates (in millions) by Phase: November 2020 Exercise Current (September - December 2020)  
+
+```{r}
+ggplotly(cadre_harmonise_caf_ipcnov2020currentgraph)
+```  
+  
+> Hover cursor over graph for more information; select phases in legend to filter
+
+### Population Estimates (in millions) by Phase: November 2020 Exercise Current (September - December 2020)  
+
+```{r}
+datatable(cadre_harmonise_caf_ipcnov2020current,  extensions = 'Buttons', options = list(pageLength = 18, dom = "Bft",
+    buttons = c('copy', 'csv', 'excel'))) %>%
+  formatStyle(
+    0,
+    target = "row",
+    fontWeight = styleEqual(18, "bold")
+  )
+
+```
+
+Row 
+-------------------------------------
+
+
+### Population Estimates (in millions) by Phase: November 2020 Exercise Projected (June - August 2021) 
+
+```{r}
+ggplotly(cadre_harmonise_caf_ipcnov2020projectedgraph)
+``` 
+
+> Hover cursor over graph for more information; select phases in legend to filter
+
+### Population Estimates (in millions) by Phase: November 2020 Exercise Projected (June - August 2021)
+    
+```{r}
+datatable(cadre_harmonise_caf_ipcnov2020projected,  extensions = 'Buttons', options = list(pageLength = 18, dom = "Bft",
+    buttons = c('copy', 'csv', 'excel'))) %>%
+  formatStyle(
+    0,
+    target = "row",
+    fontWeight = styleEqual(18, "bold")
+  )
+```
