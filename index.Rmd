@@ -2,7 +2,8 @@
 title: "**Cadre Harmonisé (CH) & Integrated Phase Classification (IPC) Estimations for West & Central Africa November 2020 Exercise Results**"
 output: 
   flexdashboard::flex_dashboard:
-  vertical_layout: fill
+  orientation: rows
+  vertical_layout: scroll
 ---
 
 ```{r setup, include=FALSE}
@@ -109,24 +110,23 @@ CHmapleaflet_projected <- CH %>% leaflet() %>% addPolygons(weight = 0.25, fillOp
 
 ```
 
-Map of Current & Projected Phases
+Map of Current & Projected Phases {data-navmenu="Maps"}
 =====================================
 
 Row 
 -------------------------------------
 
-### Phasing of Areas: Current (September - December 2020)  {data-padding=30}
-
+### Phasing of Areas: Current (September - December 2020)  
 ```{r, fig.height= 10, fig.width= 5}
 CHmapleaflet_current
 ```  
 
 > Click on polygon area for more information
 
-Row
+Row 
 -------------------------------------
 
-### Phasing of Areas:  Projected (June - August 2021) {data-padding=30}
+### Phasing of Areas:  Projected (June - August 2021)
 
 ```{r, fig.height= 10, fig.width= 5}
 CHmapleaflet_projected
@@ -135,7 +135,7 @@ CHmapleaflet_projected
 > Click on polygon area for more information
 
 
-Population Estimates (table & graph)
+Population Estimates (table & graph) {data-navmenu="Figures"}
 =====================================
 
 Row 
