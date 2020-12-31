@@ -115,12 +115,20 @@ c("Jan-May_2020_Jun-Aug_2020_projected_Burkina Faso","Jan-May_2020_Jun-Aug_2020_
 cadre_harmonise_caf_since2017 <- cadre_harmonise_caf_since2017 %>% mutate(exercise_label = case_when(
   exercise_label == "Jun-Aug" ~ "Jan-May",
   TRUE ~ exercise_label))
+#trends of phase35 in millions
 #create tables for graphing
 cadre_harmonise_caf_since2017_ph35 <- cadre_harmonise_caf_since2017 %>% group_by(adm0_name, reference_label, reference_year) %>% summarise(phase35 = sum(phase35)) %>% mutate(phase35 = round((phase35 / 1000000),1)) 
 graph_sahel <- cadre_harmonise_caf_since2017_ph35 %>% filter(adm0_name %in% c(
   "Burkina Faso","Cameroon","Central African Republic", "Chad","Mali","Mauritania","Niger","Nigeria","Senegal")) %>% ggplot(aes(x = reference_year, y = phase35, group = adm0_name, color = adm0_name)) +geom_line() +facet_grid(. ~ reference_label) +theme_minimal() +theme(axis.title.x = element_blank()) +labs(color='Country') 
 graph_coastal <- cadre_harmonise_caf_since2017_ph35 %>% filter(adm0_name %in% c(
   "Benin","Cabo Verde","Cote d'Ivoire","Gambia","Ghana","Guinea-Bissau","Liberia","Sierra Leone","Togo")) %>% ggplot(aes(x = reference_year, y = phase35, group = adm0_name, color = adm0_name)) +geom_line() +facet_grid(. ~ reference_label) +theme_minimal() +theme(axis.title.x = element_blank()) +labs(color='Country') 
+#create tables of % phase35 of analyzed population
+cadre_harmonise_caf_since2017 <- cadre_harmonise_caf_since2017 %>% mutate(totalpop = phase1+phase2+phase3+phase4+phase5)
+cadre_harmonise_caf_since2017perc <- cadre_harmonise_caf_since2017 %>% group_by(adm0_name, reference_label, reference_year) %>% summarise(phase35 = sum(phase35), totalpop = sum(totalpop)) %>% mutate(percphase35 = round((phase35 / totalpop) * 100),1)
+graph_sahelperc <- cadre_harmonise_caf_since2017perc %>% filter(adm0_name %in% c(
+  "Burkina Faso","Cameroon","Central African Republic", "Chad","Mali","Mauritania","Niger","Nigeria","Senegal")) %>% ggplot(aes(x = reference_year, y = percphase35, group = adm0_name, color = adm0_name)) +geom_line() +facet_grid(. ~ reference_label) +theme_minimal() +theme(axis.title.x = element_blank()) +labs(color='Country') 
+graph_coastalperc <- cadre_harmonise_caf_since2017perc %>% filter(adm0_name %in% c(
+  "Benin","Cabo Verde","Cote d'Ivoire","Gambia","Ghana","Guinea-Bissau","Liberia","Sierra Leone","Togo")) %>% ggplot(aes(x = reference_year, y = percphase35, group = adm0_name, color = adm0_name)) +geom_line() +facet_grid(. ~ reference_label) +theme_minimal() +theme(axis.title.x = element_blank()) +labs(color='Country') 
 
 
 
@@ -219,12 +227,11 @@ datatable(cadre_harmonise_caf_ipcnov2020projected,  extensions = 'Buttons', opti
 ```
 
 
-Phase 3-5 Trends {data-navmenu="Trends"}
+Phase 3-5 Trends (population) {data-navmenu="Trends"}
 =====================================
 
 Row 
 -------------------------------------
-
 
 ### Trends of the number of people in phas3 - 5 (in millions) by Reference Period: Sahel5 + Cameroon, C.A.R. and Nigeria
 
@@ -238,6 +245,28 @@ ggplotly(graph_sahel)
 
 ```{r}
 ggplotly(graph_coastal)
+``` 
+
+> Hover cursor over graph for more information; select countries in legend to filter
+
+Phase 3-5 Trends (percent of population) {data-navmenu="Trends"}
+=====================================
+
+Row 
+-------------------------------------
+
+### Trends of the percent of people in phase3 - 5 out of total analyzed population by Reference Period: Sahel5 + Cameroon, C.A.R. and Nigeria
+
+```{r}
+ggplotly(graph_sahelperc)
+``` 
+
+> Hover cursor over graph for more information; select countries in legend to filter
+
+### Trends of the percent of people in phase3 - 5 out of total analyzed population by Reference Period: Coastal Countries
+
+```{r}
+ggplotly(graph_coastalperc)
 ``` 
 
 > Hover cursor over graph for more information; select countries in legend to filter
