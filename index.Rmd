@@ -1,9 +1,10 @@
 ---
-title: "**Cadre Harmonisé (CH) & Integrated Phase Classification (IPC) Estimations for West & Central Africa November 2020 Exercise Results**"
+title: "**Cadre Harmonisé (CH) & Integrated Phase Classification (IPC) Estimations for West & Central Africa**"
 output: 
   flexdashboard::flex_dashboard:
-  orientation: rows
-  vertical_layout: scroll
+    source_code: "https://github.com/olanderb/CHIPCdataRBD/"
+    social: "menu"
+  
 ---
 
 ```{r setup, include=FALSE}
@@ -104,7 +105,7 @@ CHmapleaflet_projected <- CH %>% leaflet() %>% addPolygons(weight = 0.25, fillOp
 
 
 #for making trends since 2017
-cadre_harmonise_caf_since2017 <- cadre_harmonise_caf_ipc %>% filter(exercise_year >= 2017)  %>% mutate_at(vars(phase35), replace_na, 0) 
+cadre_harmonise_caf_since2017 <- cadre_harmonise_caf_ipc %>% filter(exercise_year >= 2017)  %>% mutate_at(vars(population:phase35), replace_na, 0) 
 #remove the projections from fall exercises for 2017,2018 and 2019
 cadre_harmonise_caf_since2017 <- cadre_harmonise_caf_since2017 %>% mutate(usethis = paste(exercise_label, exercise_year, chtype, sep = '_'))
 cadre_harmonise_caf_since2017 <- cadre_harmonise_caf_since2017 %>% filter(!usethis %in% c("Sep-Dec_2017_projected","Sep-Dec_2018_projected","Sep-Dec_2019_projected"))
@@ -121,14 +122,14 @@ cadre_harmonise_caf_since2017_ph35 <- cadre_harmonise_caf_since2017 %>% group_by
 graph_sahel <- cadre_harmonise_caf_since2017_ph35 %>% filter(adm0_name %in% c(
   "Burkina Faso","Cameroon","Central African Republic", "Chad","Mali","Mauritania","Niger","Nigeria","Senegal")) %>% ggplot(aes(x = reference_year, y = phase35, group = adm0_name, color = adm0_name)) +geom_line() +facet_grid(. ~ reference_label) +theme_minimal() +theme(axis.title.x = element_blank()) +labs(color='Country') 
 graph_coastal <- cadre_harmonise_caf_since2017_ph35 %>% filter(adm0_name %in% c(
-  "Benin","Cabo Verde","Cote d'Ivoire","Gambia","Ghana","Guinea-Bissau","Liberia","Sierra Leone","Togo")) %>% ggplot(aes(x = reference_year, y = phase35, group = adm0_name, color = adm0_name)) +geom_line() +facet_grid(. ~ reference_label) +theme_minimal() +theme(axis.title.x = element_blank()) +labs(color='Country') 
+  "Benin","Cabo Verde","Cote d'Ivoire","Gambia","Ghana","Guinea","Guinea-Bissau","Liberia","Sierra Leone","Togo")) %>% ggplot(aes(x = reference_year, y = phase35, group = adm0_name, color = adm0_name)) +geom_line() +facet_grid(. ~ reference_label) +theme_minimal() +theme(axis.title.x = element_blank()) +labs(color='Country') 
 #create tables of % phase35 of analyzed population
 cadre_harmonise_caf_since2017 <- cadre_harmonise_caf_since2017 %>% mutate(totalpop = phase1+phase2+phase3+phase4+phase5)
 cadre_harmonise_caf_since2017perc <- cadre_harmonise_caf_since2017 %>% group_by(adm0_name, reference_label, reference_year) %>% summarise(phase35 = sum(phase35), totalpop = sum(totalpop)) %>% mutate(percphase35 = round((phase35 / totalpop) * 100),1)
 graph_sahelperc <- cadre_harmonise_caf_since2017perc %>% filter(adm0_name %in% c(
   "Burkina Faso","Cameroon","Central African Republic", "Chad","Mali","Mauritania","Niger","Nigeria","Senegal")) %>% ggplot(aes(x = reference_year, y = percphase35, group = adm0_name, color = adm0_name)) +geom_line() +facet_grid(. ~ reference_label) +theme_minimal() +theme(axis.title.x = element_blank()) +labs(color='Country') 
 graph_coastalperc <- cadre_harmonise_caf_since2017perc %>% filter(adm0_name %in% c(
-  "Benin","Cabo Verde","Cote d'Ivoire","Gambia","Ghana","Guinea-Bissau","Liberia","Sierra Leone","Togo")) %>% ggplot(aes(x = reference_year, y = percphase35, group = adm0_name, color = adm0_name)) +geom_line() +facet_grid(. ~ reference_label) +theme_minimal() +theme(axis.title.x = element_blank()) +labs(color='Country') 
+  "Benin","Cabo Verde","Cote d'Ivoire","Gambia","Ghana","Guinea","Guinea-Bissau","Liberia","Sierra Leone","Togo")) %>% ggplot(aes(x = reference_year, y = percphase35, group = adm0_name, color = adm0_name)) +geom_line() +facet_grid(. ~ reference_label) +theme_minimal() +theme(axis.title.x = element_blank()) +labs(color='Country') 
 
 
 
